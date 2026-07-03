@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experimental Wasm Image Viewer</title>
+<style>
+  html, body {
+    margin: 0;
+    background: #181818;
+    color: #ddd;
+    font-family: system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  #login-form {
+    margin-top: 20vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: min(90vw, 18rem);
+  }
+  #login-form input, #login-form button {
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+  #login-error { color: #f66; min-height: 1.2em; }
+  [hidden] { display: none !important; }
+  #loader { margin-top: 40vh; font-size: 1.25rem; }
+  /* Responsive: canvas internal resolution is set by wasm; CSS fits the
+     whole composited page into exactly one viewport, letterboxing as
+     needed (small on phones by design). */
+  #stage {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+</style>
+</head>
+<body>
+  <form id="login-form">
+    <h1>Image Viewer</h1>
+    <input id="user" placeholder="username" autocomplete="username">
+    <input id="pass" type="password" placeholder="password" autocomplete="current-password">
+    <button type="submit">Log in</button>
+    <div id="login-error"></div>
+  </form>
+  <div id="loader" hidden><span id="loader-text">Loading…</span></div>
+  <div id="stage" hidden><canvas id="view"></canvas></div>
+  <script src="viewer.js" defer></script>
+</body>
+</html>
