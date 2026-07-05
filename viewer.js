@@ -82,20 +82,32 @@ function advance() {
   blit();
 }
 
+function retreat() {
+  wasm.wa_retreat();
+  blit();
+}
+
 function isAdvanceKey(e) {
   if (["Shift", "Control", "Alt", "Meta"].includes(e.key)) return false;
   if (/^F([1-9]|1[0-2])$/.test(e.key)) return false; // keep refresh/devtools usable
   return true;
 }
 
+const RETREAT_KEYS = ["ArrowUp", "ArrowLeft", "PageUp", "Backspace"];
+
 function startViewer() {
   advance(); // initial state: first image shown
   window.addEventListener("keydown", (e) => {
     if (!isAdvanceKey(e)) return;
     e.preventDefault();
-    advance();
+    if (RETREAT_KEYS.includes(e.key)) retreat();
+    else advance();
   });
-  window.addEventListener("mousedown", () => advance());
+  // top half of the viewport steps backward, bottom half forward
+  window.addEventListener("mousedown", (e) => {
+    if (e.clientY < window.innerHeight / 2) retreat();
+    else advance();
+  });
 }
 
 loginForm.addEventListener("submit", async (e) => {

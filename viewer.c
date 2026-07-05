@@ -104,7 +104,7 @@ static size_t pixel_bytes_total = 0;
 
 static int page[PAGE_SIZE];  /* indices of images on the current page */
 static int page_count = 0;   /* images currently stacked on the page */
-static int cursor = 0;       /* next image index to show */
+static long long step = 0;   /* 1-based position in the viewing sequence */
 
 static uint32_t *fb = NULL;
 static int fb_w = 0, fb_h = 0;
@@ -239,15 +239,32 @@ static void composite(void) {
     }
 }
 
-/* Advance: add the next image to the page, or start a new page after the
- * 3rd. Wraps past the last image. Recomposites the framebuffer. */
+/* The viewing sequence is fully determined by `step`: state k shows images
+ * base..k-1 (indices mod image_count) where base = floor((k-1)/3)*3. The
+ * sequence is periodic with period 3*image_count, so advance and retreat
+ * are just +1/-1 with wraparound in either direction. */
+static void show_step(void) {
+    long long base = (step - 1) / PAGE_SIZE * PAGE_SIZE;
+    page_count = (int)(step - base);
+    for (int i = 0; i < page_count; i++)
+        page[i] = (int)((base + i) % image_count);
+    composite();
+}
+
 WASM_EXPORT("wa_advance")
 void wa_advance(void) {
     if (image_count == 0) return;
-    if (page_count >= PAGE_SIZE) page_count = 0;
-    page[page_count++] = cursor;
-    cursor = (cursor + 1) % image_count;
-    composite();
+    long long period = (long long)PAGE_SIZE * image_count;
+    step = step % period + 1;
+    show_step();
+}
+
+WASM_EXPORT("wa_retreat")
+void wa_retreat(void) {
+    if (image_count == 0) return;
+    long long period = (long long)PAGE_SIZE * image_count;
+    step = (step - 2 + period) % period + 1;
+    show_step();
 }
 
 WASM_EXPORT("wa_fb_ptr") uint32_t *wa_fb_ptr(void) { return fb; }
