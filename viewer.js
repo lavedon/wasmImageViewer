@@ -16,13 +16,13 @@ const ctx = canvas.getContext("2d");
 let wasm = null;
 
 async function initWasm() {
-  const res = await fetch("viewer.wasm");
+  const res = await fetch("viewer.wasm", { cache: "no-cache" });
   let result;
   try {
     result = await WebAssembly.instantiateStreaming(res, {});
   } catch {
     // dev servers sometimes mis-type .wasm; fall back to buffered compile
-    result = await WebAssembly.instantiate(await (await fetch("viewer.wasm")).arrayBuffer(), {});
+    result = await WebAssembly.instantiate(await (await fetch("viewer.wasm", { cache: "no-cache" })).arrayBuffer(), {});
   }
   wasm = result.instance.exports;
 }
@@ -44,12 +44,12 @@ function checkLogin(user, pass) {
 /* All-or-nothing load: every manifest image is fetched, decoded, and
  * downscaled into wasm memory before the first image is shown. */
 async function loadAll() {
-  const manifest = await (await fetch("manifest.json")).json();
+  const manifest = await (await fetch("manifest.json", { cache: "no-cache" })).json();
   const urls = manifest.images;
   let done = 0;
   loaderText.textContent = `Loading 0 / ${urls.length}…`;
   for (const url of urls) {
-    const buf = await (await fetch(url)).arrayBuffer();
+    const buf = await (await fetch(url, { cache: "no-cache" })).arrayBuffer();
     const ptr = wasm.wa_alloc(buf.byteLength);
     new Uint8Array(wasm.memory.buffer, ptr, buf.byteLength).set(new Uint8Array(buf));
     if (!wasm.wa_load_image(ptr, buf.byteLength)) {
