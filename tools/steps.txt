@@ -1,0 +1,31 @@
+# N|step text  (markdown: **bold**, `code`, *italic*). Blank lines and #-lines ignored.
+# Loci 1-29 = every step in "Each Loci with images" (Rooms 1-3) that has a mnemonic art image.
+1|**Org wide interaction code on** FIRST
+2|Settings → Account → **Embedded widget**
+3|sign-in support → check **Interaction Code**
+4|**App** → General → Grant type →
+5|add **Interaction Code**
+6|Security + Api + **Custom auth server**
+7|`Widget Lab` (audience `api://widget-lab`)
+8|→ copy *its* Issuer into config.js
+9|Auth server → **Access Policies** → Add
+10|Rule → allow **Interaction Code**
+11|scopes `openid profile email`
+12|Auth server → **Claims** → Name = **`groups`** (lowercase!)
+13|**ID Token**, value type **Groups**
+14|filter *Starts with* `widget`, **Include in = Any scope**
+15|**API:** `POST $org/api/v1/`
+16|`groups` → create `widget-users`
+17|**API:** `POST $org/api/v1/users?activate=true`
+18|**API:** `PUT …/groups/{groupId}/users/{userId}` → add member (204)
+19|**kba:** enable Security Question authenticator
+20|enrollment Required; **app authentication policy**
+21|rule requires the Security Question →
+22|`kba` in `amr`
+23|**Verify via System Log:**
+24|user created · successful sign-in
+25|`groups: widget-users`
+26|`amr` with 2+ factor
+27|Turn off favicon — prevent guardian freakout
+28|`<link rel=icon`
+29|`href="data:,">`
